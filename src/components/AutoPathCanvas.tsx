@@ -69,9 +69,87 @@ export default function AutoPathCanvas({ points, onChange, readOnly = false, wid
         onTouchMove={handleMove}
         onTouchEnd={handleEnd}
       >
-        {/* Field grid lines */}
-        <line x1={width/2} y1={0} x2={width/2} y2={height} stroke="hsl(217 33% 30%)" strokeWidth="1" strokeDasharray="4" />
-        <line x1={0} y1={height/2} x2={width} y2={height/2} stroke="hsl(217 33% 30%)" strokeWidth="1" strokeDasharray="4" />
+        {/* FTC field stylized background */}
+        <rect x={8} y={8} width={width - 16} height={height - 16} rx={8} fill="hsl(222 39% 15%)" />
+
+        {/* Grid */}
+        {Array.from({ length: 5 }).map((_, i) => {
+          const x = 8 + ((width - 16) / 4) * i;
+          const y = 8 + ((height - 16) / 4) * i;
+          return (
+            <>
+              <line
+                key={`v-${i}`}
+                x1={x}
+                y1={8}
+                x2={x}
+                y2={height - 8}
+                stroke="hsl(215 16% 32%)"
+                strokeWidth={0.75}
+                strokeDasharray="4 4"
+              />
+              <line
+                key={`h-${i}`}
+                x1={8}
+                y1={y}
+                x2={width - 8}
+                y2={y}
+                stroke="hsl(215 16% 32%)"
+                strokeWidth={0.75}
+                strokeDasharray="4 4"
+              />
+            </>
+          );
+        })}
+
+        {/* Center diagonals */}
+        <line
+          x1={8}
+          y1={8}
+          x2={width - 8}
+          y2={height - 8}
+          stroke="hsl(210 40% 80%)"
+          strokeWidth={1.5}
+        />
+        <line
+          x1={width - 8}
+          y1={8}
+          x2={8}
+          y2={height - 8}
+          stroke="hsl(210 40% 80%)"
+          strokeWidth={1.5}
+        />
+
+        {/* Alliance squares */}
+        <rect
+          x={16}
+          y={height / 2 - 28}
+          width={36}
+          height={56}
+          fill="none"
+          stroke="hsl(0 84% 60%)"
+          strokeWidth={2}
+        />
+        <rect
+          x={width - 52}
+          y={height / 2 - 28}
+          width={36}
+          height={56}
+          fill="none"
+          stroke="hsl(217 91% 60%)"
+          strokeWidth={2}
+        />
+
+        {/* Dashed midline for orientation */}
+        <line
+          x1={width / 2}
+          y1={8}
+          x2={width / 2}
+          y2={height - 8}
+          stroke="hsl(215 20% 65%)"
+          strokeWidth={1}
+          strokeDasharray="6 4"
+        />
         {pathD && (
           <path d={pathD} fill="none" stroke="hsl(217 91% 60%)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
         )}
