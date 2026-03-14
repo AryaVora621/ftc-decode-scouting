@@ -45,6 +45,10 @@ export default function AutoPathCanvas({ points, onChange, readOnly = false, wid
     ? `M ${points.map(p => `${p.x * 3} ${p.y * 2}`).join(' L ')}`
     : '';
 
+  const margin = 8;
+  const innerWidth = width - margin * 2;
+  const innerHeight = height - margin * 2;
+
   return (
     <div className="card-surface p-3">
       <div className="flex items-center justify-between mb-2">
@@ -69,89 +73,162 @@ export default function AutoPathCanvas({ points, onChange, readOnly = false, wid
         onTouchMove={handleMove}
         onTouchEnd={handleEnd}
       >
-        {/* FTC field stylized background */}
-        <rect x={8} y={8} width={width - 16} height={height - 16} rx={8} fill="hsl(222 39% 15%)" />
+        {/* Field base */}
+        <rect
+          x={margin}
+          y={margin}
+          width={innerWidth}
+          height={innerHeight}
+          rx={4}
+          fill="hsl(220 10% 30%)"
+        />
 
-        {/* Grid */}
-        {Array.from({ length: 5 }).map((_, i) => {
-          const x = 8 + ((width - 16) / 4) * i;
-          const y = 8 + ((height - 16) / 4) * i;
+        {/* Tile grid: 6x6 */}
+        {Array.from({ length: 7 }).map((_, i) => {
+          const x = margin + (innerWidth / 6) * i;
           return (
-            <>
-              <line
-                key={`v-${i}`}
-                x1={x}
-                y1={8}
-                x2={x}
-                y2={height - 8}
-                stroke="hsl(215 16% 32%)"
-                strokeWidth={0.75}
-                strokeDasharray="4 4"
-              />
-              <line
-                key={`h-${i}`}
-                x1={8}
-                y1={y}
-                x2={width - 8}
-                y2={y}
-                stroke="hsl(215 16% 32%)"
-                strokeWidth={0.75}
-                strokeDasharray="4 4"
-              />
-            </>
+            <line
+              key={`gv-${i}`}
+              x1={x}
+              y1={margin}
+              x2={x}
+              y2={height - margin}
+              stroke="hsl(210 10% 45%)"
+              strokeWidth={0.6}
+            />
+          );
+        })}
+        {Array.from({ length: 7 }).map((_, i) => {
+          const y = margin + (innerHeight / 6) * i;
+          return (
+            <line
+              key={`gh-${i}`}
+              x1={margin}
+              y1={y}
+              x2={width - margin}
+              y2={y}
+              stroke="hsl(210 10% 45%)"
+              strokeWidth={0.6}
+            />
           );
         })}
 
-        {/* Center diagonals */}
+        {/* Decode-style diagonals */}
+        {/*
+          Approximate the reference: big V from top corners into center,
+          and smaller V from bottom corners.
+        */}
         <line
-          x1={8}
-          y1={8}
-          x2={width - 8}
-          y2={height - 8}
-          stroke="hsl(210 40% 80%)"
-          strokeWidth={1.5}
-        />
-        <line
-          x1={width - 8}
-          y1={8}
-          x2={8}
-          y2={height - 8}
-          stroke="hsl(210 40% 80%)"
-          strokeWidth={1.5}
-        />
-
-        {/* Alliance squares */}
-        <rect
-          x={16}
-          y={height / 2 - 28}
-          width={36}
-          height={56}
-          fill="none"
-          stroke="hsl(0 84% 60%)"
-          strokeWidth={2}
-        />
-        <rect
-          x={width - 52}
-          y={height / 2 - 28}
-          width={36}
-          height={56}
-          fill="none"
-          stroke="hsl(217 91% 60%)"
-          strokeWidth={2}
-        />
-
-        {/* Dashed midline for orientation */}
-        <line
-          x1={width / 2}
-          y1={8}
+          x1={margin}
+          y1={margin}
           x2={width / 2}
-          y2={height - 8}
-          stroke="hsl(215 20% 65%)"
-          strokeWidth={1}
-          strokeDasharray="6 4"
+          y2={height / 2}
+          stroke="white"
+          strokeWidth={2}
         />
+        <line
+          x1={width - margin}
+          y1={margin}
+          x2={width / 2}
+          y2={height / 2}
+          stroke="white"
+          strokeWidth={2}
+        />
+        <line
+          x1={margin}
+          y1={height - margin}
+          x2={width / 2}
+          y2={height * 0.75}
+          stroke="white"
+          strokeWidth={2}
+        />
+        <line
+          x1={width - margin}
+          y1={height - margin}
+          x2={width / 2}
+          y2={height * 0.75}
+          stroke="white"
+          strokeWidth={2}
+        />
+
+        {/* Alliance scoring squares (near bottom center) */}
+        {(() => {
+          const squareSize = innerWidth / 6;
+          const y = height * 0.6;
+          const leftX = width / 2 - squareSize * 1.8;
+          const rightX = width / 2 + squareSize * 0.8;
+          return (
+            <>
+              <rect
+                x={leftX}
+                y={y}
+                width={squareSize}
+                height={squareSize}
+                fill="none"
+                stroke="hsl(0 84% 60%)"
+                strokeWidth={2}
+              />
+              <rect
+                x={rightX}
+                y={y}
+                width={squareSize}
+                height={squareSize}
+                fill="none"
+                stroke="hsl(217 91% 60%)"
+                strokeWidth={2}
+              />
+            </>
+          );
+        })()}
+
+        {/* Alliance perimeter rails on left/right */}
+        <line
+          x1={margin + innerWidth * 0.05}
+          y1={margin + innerHeight * 0.1}
+          x2={margin + innerWidth * 0.05}
+          y2={height - margin * 1.5}
+          stroke="hsl(0 84% 60%)"
+          strokeWidth={3}
+        />
+        <line
+          x1={width - (margin + innerWidth * 0.05)}
+          y1={margin + innerHeight * 0.1}
+          x2={width - (margin + innerWidth * 0.05)}
+          y2={height - margin * 1.5}
+          stroke="hsl(217 91% 60%)"
+          strokeWidth={3}
+        />
+
+        {/* Low bars on each side */}
+        {["left", "right"].map(side => {
+          const baseX =
+            side === "left"
+              ? margin + innerWidth * 0.1
+              : width - (margin + innerWidth * 0.1);
+          const sign = side === "left" ? 1 : -1;
+          const color = "white";
+          return [0.3, 0.45, 0.6].map((factor, idx) => (
+            <line
+              // eslint-disable-next-line react/no-array-index-key
+              key={`${side}-bar-${idx}`}
+              x1={baseX}
+              y1={margin + innerHeight * factor}
+              x2={baseX + sign * (innerWidth * 0.12)}
+              y2={margin + innerHeight * factor}
+              stroke={color}
+              strokeWidth={2}
+            />
+          ));
+        })}
         {pathD && (
-          <path d={pathD} fill="none" stroke="hsl(217 91% 60%)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d={pathD}
+            fill="none"
+            stroke="hsl(217 91% 60%)"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         )}
         {points.length > 0 && (
           <>
