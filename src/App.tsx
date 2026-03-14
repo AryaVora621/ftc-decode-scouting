@@ -6,6 +6,8 @@ import AppNav from "@/components/AppNav";
 import MatchScoutPage from "@/pages/MatchScout";
 import PitScoutPage from "@/pages/PitScout";
 import DataPage from "@/pages/DataPage";
+import SharePage from "@/pages/SharePage";
+import ReceivePage from "@/pages/ReceivePage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +22,8 @@ const App = () => (
           <Route path="/" element={<MatchScoutPage />} />
           <Route path="/pit" element={<PitScoutPage />} />
           <Route path="/data/*" element={<DataPage />} />
+          <Route path="/share" element={<SharePage />} />
+          <Route path="/receive" element={<ReceivePage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

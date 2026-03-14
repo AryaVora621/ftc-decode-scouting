@@ -27,6 +27,7 @@ export interface MatchEntry {
   generalNotes: string;
   // Computed
   totalScore: number;
+  synced?: boolean;
 }
 
 export interface PitEntry {
@@ -42,6 +43,7 @@ export interface PitEntry {
   humanPlayerNotes: string;
   generalNotes: string;
   autoPathJson: { x: number; y: number }[];
+  synced?: boolean;
 }
 
 export interface TeamSummary {

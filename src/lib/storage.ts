@@ -56,10 +56,14 @@ export function getMatchEntries(): MatchEntry[] {
 }
 
 export async function syncMatchEntriesFromCloud(): Promise<MatchEntry[]> {
+  const local = getMatchEntries();
   const cloud = await fetchFromSheets<MatchEntry>("match");
-  if (!cloud) return getMatchEntries();
-  writeLocal<MatchEntry>(MATCH_KEY, cloud);
-  return cloud;
+  if (!cloud) return local;
+  // Merge: keep all local entries, add any cloud entries not already present
+  const localIds = new Set(local.map((e) => e.id));
+  const merged = [...local, ...cloud.filter((e) => !localIds.has(e.id))];
+  writeLocal<MatchEntry>(MATCH_KEY, merged);
+  return merged;
 }
 
 export function saveMatchEntry(entry: MatchEntry) {
@@ -76,10 +80,13 @@ export function getPitEntries(): PitEntry[] {
 }
 
 export async function syncPitEntriesFromCloud(): Promise<PitEntry[]> {
+  const local = getPitEntries();
   const cloud = await fetchFromSheets<PitEntry>("pit");
-  if (!cloud) return getPitEntries();
-  writeLocal<PitEntry>(PIT_KEY, cloud);
-  return cloud;
+  if (!cloud) return local;
+  const localIds = new Set(local.map((e) => e.id));
+  const merged = [...local, ...cloud.filter((e) => !localIds.has(e.id))];
+  writeLocal<PitEntry>(PIT_KEY, merged);
+  return merged;
 }
 
 export function savePitEntry(entry: PitEntry) {
@@ -88,6 +95,48 @@ export function savePitEntry(entry: PitEntry) {
   writeLocal(PIT_KEY, entries);
 
   void sendToSheets("pit", entry);
+}
+
+export function getUnsyncedMatchEntries(): MatchEntry[] {
+  return getMatchEntries().filter((e) => !e.synced);
+}
+
+export function getUnsyncedPitEntries(): PitEntry[] {
+  return getPitEntries().filter((e) => !e.synced);
+}
+
+export function markMatchEntriesSynced(ids: string[]): void {
+  const entries = getMatchEntries().map((e) =>
+    ids.includes(e.id) ? { ...e, synced: true } : e
+  );
+  writeLocal(MATCH_KEY, entries);
+}
+
+export function markPitEntriesSynced(ids: string[]): void {
+  const entries = getPitEntries().map((e) =>
+    ids.includes(e.id) ? { ...e, synced: true } : e
+  );
+  writeLocal(PIT_KEY, entries);
+}
+
+export function importMatchEntries(incoming: MatchEntry[]): number {
+  const existing = getMatchEntries();
+  const existingIds = new Set(existing.map((e) => e.id));
+  const newEntries = incoming
+    .filter((e) => !existingIds.has(e.id))
+    .map((e) => ({ ...e, synced: true }));
+  writeLocal(MATCH_KEY, [...existing, ...newEntries]);
+  return newEntries.length;
+}
+
+export function importPitEntries(incoming: PitEntry[]): number {
+  const existing = getPitEntries();
+  const existingIds = new Set(existing.map((e) => e.id));
+  const newEntries = incoming
+    .filter((e) => !existingIds.has(e.id))
+    .map((e) => ({ ...e, synced: true }));
+  writeLocal(PIT_KEY, [...existing, ...newEntries]);
+  return newEntries.length;
 }
 
 export function clearAllData() {
